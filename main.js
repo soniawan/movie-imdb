@@ -38,40 +38,86 @@
 // });
 
 // USING FETCH API
+// const searchButton = document.querySelector(".search-button");
+// searchButton.addEventListener("click", function () {
+//   const inputKeyword = document.querySelector(".input-keyword");
+//   fetch("http://www.omdbapi.com/?apikey=829f9b56&s=" + inputKeyword.value)
+//     .then((response) => response.json())
+//     .then((response) => {
+//       const movies = response.Search;
+//       let cards = "";
+//       movies.forEach((movie) => (cards += showCards(movie)));
+//       const movieContainer = document.querySelector(".movie-container");
+//       movieContainer.innerHTML = cards;
+
+//       // ketika tombol detail diklik
+//       const modalDetailButton = document.querySelectorAll(
+//         ".modal-detail-button"
+//       );
+//       modalDetailButton.forEach((btn) => {
+//         btn.addEventListener("click", function () {
+//           // console.log(this);
+//           const imdbid = this.dataset.imdbid;
+//           // console.log(imdbid);
+
+//           fetch("http://www.omdbapi.com/?apikey=829f9b56&i=" + imdbid)
+//             .then((response) => response.json())
+//             .then((movie) => {
+//               // console.log(movie);
+//               const movieDetail = showMovieDetail(movie);
+//               const modalBody = document.querySelector(".modal-body");
+//               modalBody.innerHTML = movieDetail;
+//             });
+//         });
+//       });
+//     });
+// });
+
 const searchButton = document.querySelector(".search-button");
-searchButton.addEventListener("click", function () {
+searchButton.addEventListener("click", async function () {
   const inputKeyword = document.querySelector(".input-keyword");
-  fetch("http://www.omdbapi.com/?apikey=829f9b56&s=" + inputKeyword.value)
+
+  const movies = await getMovies(inputKeyword.value);
+  // console.log(movies);
+  updateUI(movies);
+});
+
+// event binding
+document.addEventListener("click", async function (e) {
+  if (e.target.classList.contains("modal-detail-button")) {
+    // console.log("ok");
+    const imdbid = e.target.dataset.imdbid;
+    const movieDetail = await getMovieDetail(imdbid);
+    updateUIDetail(movieDetail);
+  }
+});
+
+function getMovieDetail(imdbid) {
+  return fetch("http://www.omdbapi.com/?apikey=829f9b56&i=" + imdbid)
+    .then((response) => response.json())
+    .then((movie) => movie);
+}
+
+function updateUIDetail(movie) {
+  const movieDetail = showMovieDetail(movie);
+  const modalBody = document.querySelector(".modal-body");
+  modalBody.innerHTML = movieDetail;
+}
+
+function getMovies(keyword) {
+  return fetch("http://www.omdbapi.com/?apikey=829f9b56&s=" + keyword)
     .then((response) => response.json())
     .then((response) => {
-      const movies = response.Search;
-      let cards = "";
-      movies.forEach((movie) => (cards += showCards(movie)));
-      const movieContainer = document.querySelector(".movie-container");
-      movieContainer.innerHTML = cards;
-
-      // ketika tombol detail diklik
-      const modalDetailButton = document.querySelectorAll(
-        ".modal-detail-button"
-      );
-      modalDetailButton.forEach((btn) => {
-        btn.addEventListener("click", function () {
-          // console.log(this);
-          const imdbid = this.dataset.imdbid;
-          // console.log(imdbid);
-
-          fetch("http://www.omdbapi.com/?apikey=829f9b56&i=" + imdbid)
-            .then((response) => response.json())
-            .then((movie) => {
-              // console.log(movie);
-              const movieDetail = showMovieDetail(movie);
-              const modalBody = document.querySelector(".modal-body");
-              modalBody.innerHTML = movieDetail;
-            });
-        });
-      });
+      return response.Search;
     });
-});
+}
+
+function updateUI(movies) {
+  let cards = "";
+  movies.forEach((movie) => (cards += showCards(movie)));
+  const movieContainer = document.querySelector(".movie-container");
+  movieContainer.innerHTML = cards;
+}
 
 function showCards(movie) {
   return `<div class="col-md-4 my-3">
